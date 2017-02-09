@@ -10,9 +10,6 @@ tests:
     - /bin/sh -c "mvn -U -q --batch-mode clean verify sonar:sonar -Pwar,coverage-per-test -Dsonar.host.url=http://srvsonar.tolina.local -Dsonar.issuesReport.console.enable=true -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref=$CI_BUILD_REF_NAME -Dsonar.gitlab.url=https://gitlab.arxes-tolina.de -Dsonar.gitlab.project_id=ron.peters/annotation-validator"
   tags:
     - docker
-  except:
-    - master
-    - /release\/*/
 
 checks:
   stage: test
@@ -22,8 +19,6 @@ checks:
     - docker
   except:
     - tags
-    - master
-    - /release\/*/
 
 deploy:
   stage: deploy
@@ -33,8 +28,6 @@ deploy:
     - docker
   except:
     - tags
-    - master
-    - /release\/*/
 
 variables:
   BUILD_ENV: "DOCKER"
