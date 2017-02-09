@@ -8,7 +8,6 @@ import static org.springframework.core.annotation.AnnotationUtils.findAnnotation
 import static org.springframework.core.annotation.AnnotationUtils.getAnnotations;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -241,7 +240,7 @@ public class AnnotationValidator {
     /**
      * Calls dependent on the type of the given Object:
      * <br> - {@link AnnotationUtils#findAnnotation(Method, Class)} or
-     * <br> - {@link AnnotationUtils#findAnnotation(AnnotatedElement, Class)} or
+     * <br> - {@link AnnotationUtils#findAnnotation(java.lang.reflect.AnnotatedElement, Class)} or
      * <br> - {@link AnnotationUtils#findAnnotation(Class, Class)}
      */
     @Nullable
@@ -258,7 +257,7 @@ public class AnnotationValidator {
     /**
      * Calls dependent on the type of the given Object:
      * <br> - {@link AnnotationUtils#getAnnotations(Method)} or
-     * <br> - {@link AnnotationUtils#getAnnotations(AnnotatedElement)}
+     * <br> - {@link AnnotationUtils#getAnnotations(java.lang.reflect.AnnotatedElement)}
      */
     @Nullable
     private Annotation[] getAllAnnotationsFor(@Nonnull Object annotated) {
