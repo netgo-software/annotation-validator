@@ -139,6 +139,7 @@ public class AnnotationValidator {
      *
      * @param annotatedObject can be a Class, a Method or a Field
      */
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
     private void forClassOrMethodOrField(@Nonnull Object annotatedObject) {
         SoftAssertions softly = new SoftAssertions();
         List<String> annotationsList = new ArrayList<>();
