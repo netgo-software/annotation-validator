@@ -46,7 +46,7 @@ public class AnnotationValidator {
 
     /**
      * Returns an AnnotationValidator
-     * <br> - uses {@link SoftAssertions}
+     * <br> - uses SoftAssertions
      * <br> - validates all given parameters for an Annotation and fails if there are differences
      * <br> - respects parameter aliases
      *
@@ -324,8 +324,9 @@ public class AnnotationValidator {
     private boolean equalParamTypes(@Nonnull Class<?>[] typesOne, @Nonnull Class<?>[] typesTwo) {
         if (typesOne.length == typesTwo.length) {
             for (int i = 0; i < typesOne.length; i++) {
-                if (typesOne[i] != typesTwo[i])
+                if (typesOne[i] != typesTwo[i]) {
                     return false;
+                }
             }
             return true;
         }
