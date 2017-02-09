@@ -58,7 +58,7 @@ public class AnnotationDefinition {
     /**
      * Holds Method names and Parameters
      */
-    class AnnotationMethodDefinition {
+    static class AnnotationMethodDefinition {
         private String method;
         private Object[] values;
 
