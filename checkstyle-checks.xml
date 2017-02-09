@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<!--
+  ~ (c) tolina GmbH, 2016
+  -->
+
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="Checker">
+    <property name="localeCountry" value="DE"/>
+    <property name="localeLanguage" value="de"/>
+
+    <module name="TreeWalker">
+        <property name="severity" value="warning"/>
+        <property name="tabWidth" value="2"/>
+        <!-- 		<module name="AvoidStarImport"/> -->
+        <module name="IllegalImport">
+            <property name="severity" value="${severity.eclipsewarnings}"/>
+        </module>
+        <module name="RedundantImport">
+            <property name="severity" value="${severity.eclipsewarnings}"/>
+        </module>
+        <module name="UnusedImports">
+            <property name="severity" value="${severity.eclipsewarnings}"/>
+        </module>
+        <module name="EmptyBlock">
+            <!-- empty blocks mindestens kommentiert -->
+            <property name="option" value="text"/>
+            <property name="severity" value="${severity.eclipsewarnings}"/>
+        </module>
+        <!-- Es gibt einige Stellen im Code, wo diese Nested Blocks als begründet angesehen werden -->
+        <!-- 		<module name="AvoidNestedBlocks"> -->
+        <!-- 			<property name="allowInSwitchCase" value="true" /> -->
+        <!-- 			<property name="severity" value="error" /> -->
+        <!-- 		</module> -->
+        <module name="StringLiteralEquality">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="5"/>
+            <property name="severity" value="error"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="3"/>
+            <property name="severity" value="error"/>
+        </module>
+        <module name="WhitespaceAround">
+            <property name="severity" value="${severity.codeformatter}"/>
+            <!--
+                Alle möglichen Tokens bis auf
+                RCURLY, um Konstrukte wie "new Thread() { run() { a=1+1; } }.start()" zu erlauben :(
+                LCURLY, weil dahinter eigentlich ein newline kommt, allerdings manchmal auch ein Kommentar folgt vor den der Formatter kein Whitespace packt
+                SLIST, weil dieses LRCURLY und RCURLY mit einschließt
+            -->
+            <property name="tokens"
+                      value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN,COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LE, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LE, LITERAL_ASSERT, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_ELSE, LITERAL_FINALLY,  LITERAL_RETURN, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN,QUESTION, SL, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN , TYPE_EXTENSION_AND"/>
+        </module>
+
+        <!-- Keine Leerzeichen am Zeilenanfang... Einrückung muss immer per Tab erfolgen -->
+        <!-- \s matches whitespace character, ^ beginningof line. -->
+        <!--
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="^[ ]+[^\*]*$"/>
+            <property name="severity" value="${severity.codeformatter}"/>
+            <property name="message" value="Leerzeichen für Einrückungen sind nicht erlaubt - bitte Codeformatter verwenden"/>
+        </module>
+        -->
+
+        <!-- @deprecated ohne direkt folgenden Kommentartext ist nicht erlaubt -->
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="@deprecated(\s)*$"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="@deprecated ohne Kommentar ist nicht erlaubt"/>
+        </module>
+
+        <module name="SuppressWarnings">
+            <metadata name="net.sf.eclipsecs.core.comment" value="@SuppressWarnings ist nicht erlaubt (Ausnahme: 'unchecked' und 'javadoc')"/>
+            <property name="severity" value="error"/>
+            <property name="format"
+                      value="all|boxing|cast|dep-ann|deprecation|fallthrough|finally|hiding|incomplete-switch|nls|null|rawtypes|restriction|resource|serial|static-access|static-method|super|sync-override|synthetic-access|unqualified-field-access|unused"/>
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="\.printStackTrace\(\)"/>
+            <property name="ignoreComments" value="true"/>
+            <!--  leider noch zu viele, um es sofort auf error zu stellen :( -->
+            <property name="severity" value="warning"/>
+            <property name="message" value="printStackTrace nicht erlaubt. Bitte robustes Exception-Handlung implementieren."/>
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="public boolean equals\((.* )?Object "/>
+            <property name="ignoreComments" value="true"/>
+            <!--  leider noch zu viele, um es sofort auf error zu stellen :( -->
+            <property name="severity" value="warning"/>
+            <property name="message"
+                      value="Implementierung von Equals sollte vermieden werden. Bitte bestehende equals-Implementierungen mit Vorsicht (!!) durch alternative Konzepte ablösen."/>
+        </module>
+
+        <module name="LineLength">
+            <!-- Allgemeine Kommentare : ^\s*\* *.*$ und Slash (//)-Kommentare: ^\s*// dürfen länger als 180 Zeichen sein -->
+            <!-- Leider bricht eclipse trotz Einstellung 180 Zeichen erst bei 185 um... wir lassen das also als Toleranzgrenze zu -->
+            <property name="ignorePattern" value="(^\s*\* *.*$)|(^\s*//)"/>
+            <property name="severity" value="${severity.codeformatter}"/>
+            <property name="max" value="185"/>
+        </module>
+        <!-- 		<module name="LeftCurly"> -->
+        <!-- 			<property name="severity" value="${severity.codeformatter}" /> -->
+        <!-- 		</module> -->
+        <!-- 		<module name="RightCurly"> -->
+        <!-- 			<property name="severity" value="${severity.codeformatter}" /> -->
+        <!-- 		</module> -->
+        <!-- Die Namen haben öfter underscores, was im default nicht vorgesehen ist wer Lust hat, kann passende regexps schreiben... -->
+        <!-- 		<module name="LocalFinalVariableName" /> -->
+        <!-- 		<module name="LocalVariableName" /> -->
+        <!-- 		<module name="MemberName" /> -->
+        <!-- 		<module name="MethodName" /> -->
+        <!-- 		<module name="PackageName" /> -->
+        <!-- 		<module name="ParameterName" /> -->
+        <!-- 		<module name="StaticVariableName" /> -->
+        <!-- 		<module name="TypeName" /> -->
+        <!-- 		<module name="ConstantName" /> -->
+        <module name="MethodLength"/>
+        <module name="ParameterNumber">
+            <property name="max" value="12"/>
+        </module>
+        <!-- redundant modifier: zu viele Warnings für Interfaces -->
+        <!-- 		<module name="RedundantModifier" /> -->
+        <module name="NeedBraces">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="InnerAssignment"/>
+        <!--  nicht mehr, weil unser gui-Code intensiv Größenangaben verwendet -->
+        <!-- 		<module name="MagicNumber" /> -->
+        <!--  sehr streitbar... also erstmal nicht -->
+        <!-- 		<module name="SimplifyBooleanExpression" /> -->
+        <module name="SimplifyBooleanReturn"/>
+        <!-- arbeitet leider nicht so gut wie Eclipse beim "ignoreSetter" -->
+        <!-- 		<module name="HiddenField"> -->
+        <!-- 			<property name="ignoreConstructorParameter" value="true" /> -->
+        <!-- 			<property name="ignoreSetter" value="true" /> -->
+        <!-- 		</module> -->
+        <module name="BooleanExpressionComplexity">
+            <property name="max" value="7"/>
+        </module>
+        <module name="ClassFanOutComplexity">
+            <property name="max" value="30"/>
+            <property name="severity" value="info"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <!-- aus meiner Sicht wird es ab 18 kritisch, macht aber am Anfang zu viele warnings -->
+            <property name="max" value="20"/>
+            <property name="severity" value="info"/>
+        </module>
+        <!-- Erfahrung hat gezeigt, dass NPathComplexity nicht immer sinnvolle Codestellen anzeigt... da wo's 'böse' war hat die CyclomaticComplexity angeschlagen -->
+        <!-- 		<module name="NPathComplexity"/> -->
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="public +class +.+ +extends +DefaultBaseProcess"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="DefaultBaseProcess-Implementierungen dürfen nicht public sein."/>
+        </module>
+        <!-- Prüfung auf verschiedene Möglichkeiten, ein Datum zu erzeugen. -->
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="new Date\(\)"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="warning"/>
+            <property name="message" value="Statt new Date() sollte LocalDateTime.now(clock) verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="new Date\(System\.currentTimeMillis\(\)\)"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="warning"/>
+            <property name="message" value="Statt new Date(System.currentTimeMillis()) sollte LocalDateTime.now(clock) verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="Calendar.getInstance\(\)\.getTime\(\)"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="warning"/>
+            <property name="message" value="Statt Calendar.getInstance().getTime() sollte LocalDateTime.now(clock) verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="new GregorianCalendar\(\)\.getTime\(\)"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="warning"/>
+            <property name="message" value="Statt new GregorianCalendar().getTime() sollte LocalDateTime.now(clock) verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="import +org\.apache\.commons\.lang\."/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="Statt org.apache.commons.lang.X muss org.apache.commons.lang3.X verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="import +org\.apache\.commons\.collections\."/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="Statt org.apache.commons.collections.X muss org.apache.commons.collections4.X verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="import +org\.apache\.commons\.collections15\."/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="Statt org.apache.commons.collections15.X muss org.apache.commons.collections4.X verwendet werden."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="SwingUtilities\.invokeAndWait"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="severity" value="error"/>
+            <property name="message" value="Bitte SwingHelper.invokeAndWait anstelle von SwingUtilities.invokeAndWait verwenden."/>
+        </module>
+    </module>
+
+    <!-- darf TreeWalker nicht mehr als parent haben -->
+    <module name="FileLength">
+        <property name="severity" value="info"/>
+    </module>
+</module>

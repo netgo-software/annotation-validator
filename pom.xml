@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.tolina.common</groupId>
+    <artifactId>annotation-validator</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>annotation-validator</name>
+
+    <scm>
+        <connection>scm:git:ssh://git@gitlab.arxes-tolina.de/ron.peters/annotation-validator.git</connection>
+        <tag></tag>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>4.3.6.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>annotation-validator-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>internal</id>
+            <url>http://srvdb1.tolina.local:9080/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://srvdb1.tolina.local:9080/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>internal.releases</id>
+            <name>Archiva Managed Internal Repository</name>
+            <url>http://srvdb1.tolina.local:9080/repository/internal/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>internal.snapshots</id>
+            <name>Archiva Managed Snapshot Repository</name>
+            <url>http://srvdb1.tolina.local:9080/repository/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>tolina</id>
+            <name>tolina</name>
+            <url>http://srvrepo.tolina.local/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>tolina</id>
+            <name>tolina</name>
+            <url>http://srvrepo.tolina.local/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <profiles>
+        <!--
+            Aktiviert checkstyle während der Ausführung.
+        -->
+        <profile>
+            <id>checkstyle</id>
+            <build>
+                <plugins>
+                    <!-- Erzeugen der Ressourcen für eine HTML-Seite -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.9</version>
+                        <executions>
+                            <execution>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>index</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- 'checkstyle'-Plugin ausführen -->
+                    <plugin>
+                        <groupId>de.tolina.maven</groupId>
+                        <artifactId>tolina-maven-checkstyle</artifactId>
+                        <version>12.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>checkstyle</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <failsOnError>true</failsOnError>
+                            <linkXRef>false</linkXRef>
+                            <consoleOutput>true</consoleOutput>
+                            <outputFileFormat>xml</outputFileFormat>
+                            <enableRulesSummary>false</enableRulesSummary>
+                            <enableSeveritySummary>true</enableSeveritySummary>
+                            <configLocation>checkstyle-checks.xml</configLocation>
+                            <propertyExpansion>
+                                <![CDATA[severity.codeformatter=error
+        severity.eclipsewarnings=error]]>
+                            </propertyExpansion>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Aktiviert findbugs während der Ausführung.
+        -->
+        <profile>
+            <id>findbugs</id>
+            <build>
+                <plugins>
+                    <!-- 'findbugs'-Plugin ausführen (nach 'compile') -->
+                    <plugin>
+                        <groupId>de.tolina.maven</groupId>
+                        <artifactId>tolina-maven-findbugs</artifactId>
+                        <version>12.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>findbugs</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>findbugs</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <effort>Max</effort>
+                            <threshold>Low</threshold>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+                Coverage-Informationen werden pro Test aufgezeichnet.
+                Integrationstests werden wie Unit-Tests behandelt.
+            -->
+            <id>coverage-per-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.5.201505241946</version>
+                        <executions>
+                            <execution>
+                                <id>pre-test</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>org.sonar.java.jacoco.JUnitListener</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>org.sonarsource.java</groupId>
+                    <artifactId>sonar-jacoco-listeners</artifactId>
+                    <version>4.2</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>
