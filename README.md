@@ -1,4 +1,5 @@
 [![build status](https://travis-ci.org/arxes-tolina/annotation-validator.svg?branch=master)](https://github.com/arxes-tolina/annotation-validator/commits/master)
+[![quality status](https://sonarqube.com/api/badges/gate?key=de.tolina.common%3Aannotation-validator)](https://sonarqube.com/dashboard?id=de.tolina.common%3Aannotation-validator)
 
 Consider the following class
 
@@ -40,7 +41,7 @@ If you would like to check the method to be annotated with `@AnotherAnnotation`,
 ```
 validate() //
 	.annotation(type(AnotherTestAnnotation.class) //
-		.param("testEnum", TEST)) //
+		.param("value", TEST)) //
 	.forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
 
 ```
