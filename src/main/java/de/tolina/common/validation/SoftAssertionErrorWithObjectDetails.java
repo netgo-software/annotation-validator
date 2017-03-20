@@ -29,11 +29,11 @@ import org.assertj.core.api.SoftAssertionError;
 
 final class SoftAssertionErrorWithObjectDetails extends SoftAssertionError {
 	private static final long serialVersionUID = 5527685338875086360L;
-	private final Object annotatedObject;
+	private final String annotatedObject;
 
 	SoftAssertionErrorWithObjectDetails(final List<String> errors, final Object annotatedObject) {
 		super(errors);
-		this.annotatedObject = annotatedObject;
+		this.annotatedObject = annotatedObject.toString();
 	}
 
 	// if you are in a test loop and do not know witch object is under test, let's add this information to errormessage

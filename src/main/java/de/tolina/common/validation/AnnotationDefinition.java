@@ -33,6 +33,11 @@ public class AnnotationDefinition {
 	private Class<? extends Annotation> annotation;
 	private List<AnnotationMethodDefinition> annotationMethodDefinitions;
 
+	private AnnotationDefinition(@Nonnull final Class<? extends Annotation> annotation) {
+		this.annotation = annotation;
+		annotationMethodDefinitions = new ArrayList<>();
+	}
+
 	/**
 	 * Describes an Annotation type
 	 *
@@ -41,11 +46,6 @@ public class AnnotationDefinition {
 	@Nonnull
 	public static AnnotationDefinition type(@Nonnull final Class<? extends Annotation> annotatedClass) {
 		return new AnnotationDefinition(annotatedClass);
-	}
-
-	private AnnotationDefinition(@Nonnull final Class<? extends Annotation> annotation) {
-		this.annotation = annotation;
-		annotationMethodDefinitions = new ArrayList<>();
 	}
 
 	/**

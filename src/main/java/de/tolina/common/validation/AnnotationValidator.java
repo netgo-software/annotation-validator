@@ -76,9 +76,9 @@ public class AnnotationValidator {
 	 */
 	public class AnnotationValidation {
 
-		private AnnotationValidation(@Nonnull final HashSet<String> _paramBlacklist) {
+		private AnnotationValidation(@Nonnull final HashSet<String> parametersBlacklist) {
 			strictValidation = false;
-			paramBlacklist = _paramBlacklist;
+			paramBlacklist = parametersBlacklist;
 			annotationDefinitions = new ArrayList<>();
 		}
 
@@ -141,49 +141,49 @@ public class AnnotationValidator {
 			forClassOrMethodOrField(annotatedField);
 		}
 
-	}
-
-
-
-	/**
-	 * Validates the configured Annotations
-	 *
-	 * @param annotatedObject can be a Class, a Method or a Field
-	 */
-	private void forClassOrMethodOrField(@Nonnull final Object annotatedObject) {
-		final SoftAssertions softly = new SoftAssertions();
-		final List<String> annotationsList = new ArrayList<>();
-		for (final AnnotationDefinition annotationDefinition : annotationDefinitions) {
-			// check if annotation is present
-			final Annotation annotation = findAnnotationFor(annotatedObject, annotationDefinition.getAnnotation());
-			softly.assertThat(annotation).as("Expected Annotation %s not found", annotationDefinition.getAnnotation().getName()).isNotNull();
-
-			if (annotation == null) {
-				continue;
+		/**
+		 * Validates the configured Annotations
+		 *
+		 * @param annotatedObject can be a Class, a Method or a Field
+		 */
+		private void forClassOrMethodOrField(@Nonnull final Object annotatedObject) {
+			final SoftAssertions softly = new SoftAssertions();
+			final List<String> annotationsList = new ArrayList<>();
+			for (final AnnotationDefinition annotationDefinition : annotationDefinitions) {
+				// check if annotation is present
+				final Annotation annotation = findAnnotationFor(annotatedObject, annotationDefinition.getAnnotation());
+				softly.assertThat(annotation).as("Expected Annotation %s not found", annotationDefinition.getAnnotation().getName()).isNotNull();
+		
+				if (annotation == null) {
+					continue;
+				}
+		
+				annotationsList.add(annotation.annotationType().getName());
+		
+				// check all methods defined in annotation definition against current annotation's methods
+				final List<String> validatedMethods = validateAllMethodsOfAnnotationDefinition(softly, annotationDefinition, annotation);
+		
+				// check if there are undefined methods in annotation definition present in annotation
+				checkForUndefinedMethodsInAnnotation(softly, annotation, validatedMethods);
 			}
-
-			annotationsList.add(annotation.annotationType().getName());
-
-			// check all methods defined in annotation definition against current annotation's methods
-			final List<String> validatedMethods = validateAllMethodsOfAnnotationDefinition(softly, annotationDefinition, annotation);
-
-			// check if there are undefined methods in annotation definition present in annotation
-			checkForUndefinedMethodsInAnnotation(softly, annotation, validatedMethods);
+		
+			softly.assertThat(!strictValidation && CollectionUtils.isEmpty(annotationDefinitions)).as("Please add at least one Annotation to assert or enable strict validation.")
+					.isFalse();
+		
+			if (strictValidation) {
+				final Annotation[] allAnnotations = getAllAnnotationsFor(annotatedObject);
+				softly.assertThat(allAnnotations).extracting(annotation -> annotation.annotationType().getName()).containsExactlyElementsOf(annotationsList);
+			}
+			try {
+				softly.assertAll();
+			} catch (final SoftAssertionError sae) {
+				throw new SoftAssertionErrorWithObjectDetails(sae.getErrors(), annotatedObject);
+			}
 		}
 
-		softly.assertThat(!strictValidation && CollectionUtils.isEmpty(annotationDefinitions)).as("Please add at least one Annotation to assert or enable strict validation.")
-				.isFalse();
-
-		if (strictValidation) {
-			final Annotation[] allAnnotations = getAllAnnotationsFor(annotatedObject);
-			softly.assertThat(allAnnotations).extracting(annotation -> annotation.annotationType().getName()).containsExactlyElementsOf(annotationsList);
-		}
-		try {
-			softly.assertAll();
-		} catch (final SoftAssertionError sae) {
-			throw new SoftAssertionErrorWithObjectDetails(sae.getErrors(), annotatedObject);
-		}
 	}
+
+
 
 	private void checkForUndefinedMethodsInAnnotation(final SoftAssertions softly, final Annotation annotation, final List<String> validatedMethods) {
 		final Method[] allMethods = annotation.getClass().getDeclaredMethods();
@@ -263,7 +263,7 @@ public class AnnotationValidator {
 	 * <br> - {@link AnnotationUtils#findAnnotation(Class, Class)}
 	 */
 	@Nullable
-	private <T extends Annotation> Annotation findAnnotationFor(@Nonnull final Object annotated, @Nonnull final Class<? extends Annotation> annotation) {
+	private Annotation findAnnotationFor(@Nonnull final Object annotated, @Nonnull final Class<? extends Annotation> annotation) {
 		if (annotated instanceof Method) {
 			return findAnnotation((Method) annotated, annotation);
 		}

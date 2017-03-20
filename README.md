@@ -1,4 +1,4 @@
-[![build status](https://gitlab.arxes-tolina.de/ron.peters/annotation-validator/badges/master/build.svg)](https://gitlab.arxes-tolina.de/ron.peters/annotation-validator/commits/master)
+[![build status](https://travis-ci.org/arxes-tolina/annotation-validator.svg?branch=master)](https://github.com/arxes-tolina/annotation-validator/commits/master)
 
 Consider the following class
 
