@@ -1,2 +1,8 @@
-target/
+# Eclipse files
+/.settings/
+/.classpath
+/.project
 
+# Maven files
+/target/
+/pom.xml.versionsBackup

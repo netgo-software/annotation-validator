@@ -7,27 +7,9 @@ stages:
 tests:
   stage: test
   script:
-    - /bin/sh -c "mvn -U -q --batch-mode clean verify sonar:sonar -Pwar,coverage-per-test -Dsonar.host.url=http://srvsonar.tolina.local -Dsonar.issuesReport.console.enable=true -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref=$CI_BUILD_REF_NAME -Dsonar.gitlab.url=https://gitlab.arxes-tolina.de -Dsonar.gitlab.project_id=ron.peters/annotation-validator"
+    - /bin/sh -c "mvn -U --batch-mode clean verify sonar:sonar -Pcoverage-per-test -Dsonar.host.url=https://sonar.arxes-tolina.de -Dsonar.issuesReport.console.enable=true -Dsonar.gitlab.commit_sha=$CI_BUILD_REF -Dsonar.gitlab.ref=$CI_BUILD_REF_NAME -Dsonar.gitlab.url=https://gitlab.arxes-tolina.de -Dsonar.gitlab.project_id=ron.peters/annotation-validator"
   tags:
     - docker
-
-checks:
-  stage: test
-  script:
-    - mvn -U clean compile -DskipTests=true -Pcheckstyle,findbugs
-  tags:
-    - docker
-  except:
-    - tags
-
-deploy:
-  stage: deploy
-  script:
-    - mvn -U -q -DskipTests=true clean deploy
-  tags:
-    - docker
-  except:
-    - tags
 
 variables:
   BUILD_ENV: "DOCKER"
