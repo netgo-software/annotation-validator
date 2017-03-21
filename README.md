@@ -1,6 +1,21 @@
 [![build status](https://travis-ci.org/arxes-tolina/annotation-validator.svg?branch=master)](https://github.com/arxes-tolina/annotation-validator/commits/master)
 [![quality status](https://sonarqube.com/api/badges/gate?key=de.tolina.common.validation%3Aannotation-validator)](https://sonarqube.com/dashboard?id=de.tolina.common.validation%3Aannotation-validator)
 
+# Usage with Maven
+
+Add the following dependency to your pom.xml
+
+```
+<dependency>
+	<groupId>de.tolina.common.validation</groupId>
+	<artifactId>annotation-validator</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<scope>test</scope>
+</dependency>
+```
+
+# Examples
+
 Consider the following class
 
 ```
