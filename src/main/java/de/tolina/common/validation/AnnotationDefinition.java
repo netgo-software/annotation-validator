@@ -37,11 +37,11 @@ public class AnnotationDefinition {
 	/**
 	 * Describes an Annotation type
 	 *
-	 * @param annotatedClass - Type of the Annotation
+	 * @param annotationType - Type of the Annotation
 	 */
 	@Nonnull
-	public static AnnotationDefinition type(@Nonnull final Class<? extends Annotation> annotatedClass) {
-		return new AnnotationDefinition(annotatedClass);
+	public static AnnotationDefinition type(@Nonnull final Class<? extends Annotation> annotationType) {
+		return new AnnotationDefinition(annotationType);
 	}
 
 	/**

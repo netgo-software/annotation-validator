@@ -34,8 +34,8 @@ public class AnnotationValidationTest {
 	@Test
 	public void testValidateAnnotatedClass() throws NoSuchMethodException {
 
-		validate().exactly() //
-				.annotation(type(TestAnnotation.class) //
+		AnnotationValidator.validate().exactly() //
+				.annotation(AnnotationDefinition.type(TestAnnotation.class) //
 						.param("testparameter", "default") //
 						.param("anotherTestParameter", "one", "two")) //
 				.annotation(type(AnnotatedTestInterfaceAnnotation.class)) //

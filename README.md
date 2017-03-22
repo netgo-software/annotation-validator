@@ -35,6 +35,10 @@ class AnnotatedTestClass {
 If you would like to check the class to be annotated only with `@MyAnnotation` use the following
 
 ```
+import static de.tolina.common.validation.AnnotationDefinition.*;
+
+...
+
 validate().exactly() //
 	.annotation(type(MyAnnotation.class) //
 		.param("foo", "default") //
@@ -55,7 +59,7 @@ If you would like to check the method to be annotated with `@AnotherAnnotation`,
 
 ```
 validate() //
-	.annotation(type(AnotherTestAnnotation.class) //
+	.annotation(type(AnotherAnnotation.class) //
 		.param("value", TEST)) //
 	.forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
 

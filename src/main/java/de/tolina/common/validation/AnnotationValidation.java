@@ -31,7 +31,6 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.assertj.core.api.SoftAssertionError;
 import org.assertj.core.api.SoftAssertions;
@@ -39,6 +38,7 @@ import org.assertj.core.util.Lists;
 import org.assertj.core.util.VisibleForTesting;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -163,7 +163,7 @@ public class AnnotationValidation {
 		}
 	}
 
-	private void checkForUndefinedMethodsInAnnotation(final SoftAssertions softly, final Annotation annotation, final List<String> validatedMethods) {
+	private void checkForUndefinedMethodsInAnnotation(@Nonnull final SoftAssertions softly, @Nonnull final Annotation annotation, @Nonnull final List<String> validatedMethods) {
 		final Method[] allMethods = annotation.getClass().getDeclaredMethods();
 
 		for (final Method declaredMethod : allMethods) {
@@ -242,11 +242,11 @@ public class AnnotationValidation {
 
 			for (final Class<?> aClass : allClasses) {
 				final ArrayList<Method> allMethods = new ArrayList<>();
-				CollectionUtils.addAll(allMethods, aClass.getDeclaredMethods());
+				allMethods.addAll(Arrays.asList(aClass.getDeclaredMethods()));
 
 				final List<Class<?>> interfaces = ClassUtils.getAllInterfaces(aClass);
 				for (final Class<?> anInterface : interfaces) {
-					CollectionUtils.addAll(allMethods, anInterface.getDeclaredMethods());
+					allMethods.addAll(Arrays.asList(anInterface.getDeclaredMethods()));
 				}
 
 				allMethods.stream().filter(method -> isSameMethod(method, annotatedMethod)).forEachOrdered(method -> addIfNotPresent(allAnnotations, getAnnotations(method)));
@@ -277,7 +277,8 @@ public class AnnotationValidation {
 		return Objects.equals(one.getName(), two.getName()) && equalParamTypes(one.getParameterTypes(), two.getParameterTypes());
 	}
 
-	private List<String> validateAllMethodsOfAnnotationDefinition(final SoftAssertions softly, final AnnotationDefinition annotationDefinition, final Annotation annotation) {
+	private List<String> validateAllMethodsOfAnnotationDefinition(@Nonnull final SoftAssertions softly, @Nonnull final AnnotationDefinition annotationDefinition,
+			@Nonnull final Annotation annotation) {
 		final List<String> validatedMethods = Lists.newArrayList();
 
 		// check all methods defined in annotation definition
