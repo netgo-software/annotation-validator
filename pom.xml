@@ -59,8 +59,8 @@
     <url>http://github.com/arxes-tolina/annotation-validator</url>
 
     <scm>
-        <connection>scm:git:https://github.com/arxes-tolina/annotation-validator.git</connection>
-        <developerConnection>scm:git:git@github.com:arxes-tolina/annotation-validator.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com/arxes-tolina/annotation-validator.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/arxes-tolina/annotation-validator.git</developerConnection>
         <url>https://github.com/arxes-tolina/annotation-validator</url>
         <tag></tag>
     </scm>
