@@ -184,15 +184,15 @@ public class AnnotationValidationTest {
 	public void testValidateLambdas() throws Exception {
 		TestInterface test1 = TestInterface::staticMethod;
 		Method annotatedMethod1= test1.getClass().getMethod("method");
-		validate().exactly().annotation(type(Deprecated.class)).forMethod(annotatedMethod1);
+		validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod1);
 		
 		TestInterface test2 = test1::defaultMethod;
 		Method annotatedMethod2= test2.getClass().getMethod("defaultMethod");
-		validate().exactly().annotation(type(Deprecated.class)).forMethod(annotatedMethod2);
+		validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod2);
 	}
 	
 
-	static interface TestInterface {
+	interface TestInterface {
 		
 		@Deprecated
 		void method();
