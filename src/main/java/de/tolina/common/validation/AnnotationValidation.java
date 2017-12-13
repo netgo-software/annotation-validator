@@ -79,7 +79,7 @@ public class AnnotationValidation {
 	
 	
 	/**
-	 * Validates that no other Annotations are defined
+	 * Validates that no other Annotations are defined and only the defined params are present.
 	 *
 	 * @return the AnnotationValidator
 	 */
@@ -91,7 +91,7 @@ public class AnnotationValidation {
 	
 	
 	/**
-	 * Validates that no other Annotations are defined
+	 * Validates that no other Annotations are defined considering default values for undefined params.
 	 *
 	 * @return the AnnotationValidator
 	 */
