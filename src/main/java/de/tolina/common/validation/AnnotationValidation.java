@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,11 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.VisibleForTesting;
 
+import static de.tolina.common.validation.ValidationMode.DEFAULT;
+import static de.tolina.common.validation.ValidationMode.EXACTLY;
+import static de.tolina.common.validation.ValidationMode.ONLY;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * API for {@link AnnotationValidator}
@@ -44,14 +49,14 @@ public class AnnotationValidation {
 	@VisibleForTesting
 	HashSet<String> paramBlacklist;
 	private List<AnnotationDefinition> annotationDefinitions;
-	private boolean strictValidation;
+	private ValidationMode validationMode;
 	private Annotation[] allAnnotations;
 	
 	
 	AnnotationValidation(
 			@Nonnull
 			final HashSet<String> parametersBlacklist) {
-		strictValidation = false;
+		validationMode = DEFAULT;
 		paramBlacklist = parametersBlacklist;
 		annotationDefinitions = new ArrayList<>();
 	}
@@ -61,6 +66,7 @@ public class AnnotationValidation {
 	 * Adds an {@link AnnotationDefinition} to the Validator
 	 *
 	 * @param annotationDefinition the Annotation
+	 *
 	 * @return the AnnotationValidator
 	 */
 	@Nonnull
@@ -79,7 +85,19 @@ public class AnnotationValidation {
 	 */
 	@Nonnull
 	public AnnotationValidation exactly() {
-		strictValidation = true;
+		validationMode = EXACTLY;
+		return this;
+	}
+	
+	
+	/**
+	 * Validates that no other Annotations are defined
+	 *
+	 * @return the AnnotationValidator
+	 */
+	@Nonnull
+	public AnnotationValidation only() {
+		validationMode = ONLY;
 		return this;
 	}
 	
@@ -162,11 +180,11 @@ public class AnnotationValidation {
 			});
 		}
 		
-		softly.assertThat(!strictValidation && annotationDefinitions.isEmpty())
+		softly.assertThat(validationMode == DEFAULT && annotationDefinitions.isEmpty())
 				.as("Please add at least one Annotation to assert or enable strict validation.")
 				.isFalse();
 		
-		if (strictValidation) {
+		if (validationMode != DEFAULT) {
 			softly.assertThat(allAnnotations)
 					.extracting(annotation -> annotation.annotationType().getName())
 					.containsExactlyElementsOf(annotationsList);
@@ -212,14 +230,30 @@ public class AnnotationValidation {
 			}
 			
 			// all methods in current annotation which are not defined in annotation definition or blacklist are to be reported as error
-			Object defaultValue = declaredMethod.getDefaultValue();
 			final Object methodResult;
 			try {
 				methodResult = declaredMethod.invoke(annotation);
 				
-				softly.assertThat(methodResult)
-						.as("Unexpected value for Method '%s' found.", declaredMethod.getName())
-						.isEqualTo(defaultValue);
+				if (validationMode != EXACTLY) {
+					Object defaultValue = declaredMethod.getDefaultValue();
+					
+					softly.assertThat(methodResult)
+							.as("Unexpected value for Method '%s' found.", declaredMethod.getName())
+							.isEqualTo(defaultValue);
+				} else {
+					if (Object[].class.isInstance(methodResult)) {
+						softly.assertThat((Object[]) methodResult)
+								.as("Unexpected values for %s found.", declaredMethod.getName()).isNullOrEmpty();
+					} else {
+						final String description = "Unexpected value for Method '%s' found.";
+						if (methodResult instanceof String) {
+							softly.assertThat((String) methodResult).as(description, declaredMethod.getName())
+									.isNullOrEmpty();
+						} else {
+							softly.assertThat(methodResult).as(description, declaredMethod.getName()).isNull();
+						}
+					}
+				}
 			} catch (IllegalAccessException | InvocationTargetException e) {
 				e.printStackTrace();
 			}
@@ -339,57 +373,122 @@ public class AnnotationValidation {
 		for (final AnnotationDefinition.AnnotationMethodDefinition annotationMethodDefinition : annotationDefinition
 				.getAnnotationMethodDefinitions()) {
 			final String methodName = annotationMethodDefinition.getMethod();
-			final Object[] values = annotationMethodDefinition.getValues();
+			final Object[] expectedValues = annotationMethodDefinition.getValues();
 			
-			Method method = null;
+			Method actualMethod = null;
 			try {
-				method = annotation.annotationType().getMethod(methodName);
+				actualMethod = annotation.annotationType().getMethod(methodName);
 			} catch (final NoSuchMethodException e) {
-				// noop
-			}
-			
-			// check that defined method is present in annotation
-			softly.assertThat(method).as("Method %s not found.", methodName).isNotNull();
-
-			if (method == null) {
+				softly.assertThat(actualMethod).as("Method %s not found.", methodName).isNotNull();
 				continue;
 			}
-
-			// check that actual method in annotation has defined return types
-			final Object methodResult;
-			try {
-				methodResult = method.invoke(annotation);
-				if (Object[].class.isInstance(methodResult)) {
-					// this produces readable descriptions on its own
-					// all and only defined values must be returned in defined order
-					softly.assertThat((Object[]) methodResult).containsExactlyElementsOf(Arrays.asList(values));
-				} else {
-					// this produces readable descriptions on its own
-					softly.assertThat(methodResult).isEqualTo(values[0]);
+			
+			// check if this annotation's actualMethod is an alias
+			Method aliasMethod = null;
+			Optional<Annotation> aliasForAnnotation = getAliasNameIfPresent(actualMethod);
+			if (aliasForAnnotation.isPresent()) {
+				try {
+					aliasMethod = getAliasMethod(annotation, aliasForAnnotation.get());
+				} catch (NoSuchMethodException e) {
+					softly.assertThat(actualMethod)
+							.as("Referenced alias method %s not found.", aliasForAnnotation.get())
+							.isNotNull();
+					continue;
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					e.printStackTrace();
 				}
-				validatedMethods.add(method.getName());
-			} catch (IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
 			}
 			
-			// check if this annotation's method is an alias
-			Arrays.stream(method.getDeclaredAnnotations())
-					.filter(annotationFound -> annotationFound.annotationType().getName().endsWith("AliasFor"))
-					.findAny()
-					.ifPresent(annotationFound -> {
-						try {
-							validatedMethods.add(annotationFound
-									.annotationType()
-									.getDeclaredMethod("attribute")
-									.invoke(annotationFound)
-									.toString());
-						} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-							e.printStackTrace();
-						}
-					});
+			
+			// check that actual actualMethod in annotation has defined return types
+			final Object actualMethodResult;
+			final Object aliasMethodResult;
+			Object assertableResult = null;
+			try {
+				actualMethodResult = actualMethod.invoke(annotation);
+				assertableResult = actualMethodResult;
+				
+				assertMethodResult(actualMethodResult, expectedValues);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				e.printStackTrace();
+			} catch (AssertionError e) {
+				if (aliasForAnnotation.isPresent()) {
+					try {
+						aliasMethodResult = aliasMethod.invoke(annotation);
+						
+						assertMethodResult(aliasMethodResult, expectedValues);
+						
+						assertableResult = aliasMethodResult;
+					} catch (IllegalAccessException | InvocationTargetException e1) {
+						e1.printStackTrace();
+					} catch (AssertionError e1) {
+						// noop
+					}
+				}
+			}
+			
+			if (Object[].class.isInstance(assertableResult)) {
+				// this produces readable descriptions on its own
+				// all and only defined values must be returned in defined order
+				softly.assertThat((Object[]) assertableResult).containsExactlyElementsOf(Arrays.asList(expectedValues));
+			} else {
+				// this produces readable descriptions on its own
+				softly.assertThat(assertableResult).isEqualTo(expectedValues[0]);
+			}
+			
+			validatedMethods.add(actualMethod.getName());
+			if (aliasForAnnotation.isPresent()) {
+				validatedMethods.add(aliasMethod.getName());
+			}
 		}
 		
 		return validatedMethods;
+	}
+	
+	
+	private Method getAliasMethod(Annotation originalAnnotation, Annotation aliasForAnnotation)
+			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		Method annotationMethod = aliasForAnnotation.annotationType().getDeclaredMethod("annotation");
+		Class<? extends Annotation> annotationValue =
+				(Class<? extends Annotation>) annotationMethod.invoke(aliasForAnnotation);
+		
+		String aliasMethodName;
+		if (!annotationValue.equals(annotationMethod.getDefaultValue())) {
+			aliasMethodName = aliasForAnnotation
+					.annotationType()
+					.getDeclaredMethod("attribute")
+					.invoke(aliasForAnnotation)
+					.toString();
+			
+			return annotationValue.getDeclaredMethod(aliasMethodName);
+		} else {
+			aliasMethodName = aliasForAnnotation
+					.annotationType()
+					.getDeclaredMethod("value")
+					.invoke(aliasForAnnotation)
+					.toString();
+			
+			return originalAnnotation.annotationType().getDeclaredMethod(aliasMethodName);
+		}
+	}
+	
+	
+	private void assertMethodResult(Object actualValues, Object[] expectedValues) {
+		if (Object[].class.isInstance(actualValues)) {
+			// this produces readable descriptions on its own
+			// all and only defined values must be returned in defined order
+			assertThat((Object[]) actualValues).containsExactlyElementsOf(Arrays.asList(expectedValues));
+		} else {
+			// this produces readable descriptions on its own
+			assertThat(actualValues).isEqualTo(expectedValues[0]);
+		}
+	}
+	
+	
+	private Optional<Annotation> getAliasNameIfPresent(Method method) {
+		return Arrays.stream(method.getDeclaredAnnotations())
+				.filter(annotationFound -> annotationFound.annotationType().getName().endsWith("AliasFor"))
+				.findAny();
 	}
 	
 }

@@ -16,6 +16,7 @@
 package de.tolina.common.validation;
 
 import static de.tolina.common.validation.TestEnum.TEST;
+import static de.tolina.common.validation.TestEnum.TEST2;
 
 @TestAnnotation
 @SuppressWarnings("javadoc")
@@ -27,12 +28,12 @@ class AnnotatedTestClass extends AnnotatedAbstractTestClass implements Annotated
 	String fieldWithoutAnnotations;
 
 	@TestAnnotation(testparameter = "testvalue", anotherTestParameter = "anotherTestValue")
-	@AnotherTestAnnotation(TEST)
+	@AnotherTestAnnotation(TEST2)
 	public void methodWithAnnotations() {
 		// noop
 	}
 
-	@AliasTestAnnotation(referencedTestEnum = TEST)
+	@AliasTestAnnotation(referencedTestEnum = TEST2)
 	public void methodWithAliasAnnotations() {
 		// noop
 	}

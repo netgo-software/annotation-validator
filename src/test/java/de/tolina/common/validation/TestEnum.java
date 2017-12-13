@@ -17,5 +17,5 @@ package de.tolina.common.validation;
 
 @SuppressWarnings("javadoc")
 public enum TestEnum {
-	TEST
+	TEST, TEST2
 }
