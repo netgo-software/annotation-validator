@@ -15,11 +15,9 @@
  */
 package de.tolina.common.validation;
 
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.getAnnotations;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -36,26 +34,29 @@ import org.assertj.core.api.SoftAssertionError;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.VisibleForTesting;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
+
 
 /**
  * API for {@link AnnotationValidator}
  */
 public class AnnotationValidation {
+	
 	@VisibleForTesting
 	HashSet<String> paramBlacklist;
 	private List<AnnotationDefinition> annotationDefinitions;
 	private boolean strictValidation;
-
-	AnnotationValidation(@Nonnull final HashSet<String> parametersBlacklist) {
+	private Annotation[] allAnnotations;
+	
+	
+	AnnotationValidation(
+			@Nonnull
+			final HashSet<String> parametersBlacklist) {
 		strictValidation = false;
 		paramBlacklist = parametersBlacklist;
 		annotationDefinitions = new ArrayList<>();
 	}
-
+	
+	
 	/**
 	 * Adds an {@link AnnotationDefinition} to the Validator
 	 *
@@ -63,11 +64,14 @@ public class AnnotationValidation {
 	 * @return the AnnotationValidator
 	 */
 	@Nonnull
-	public AnnotationValidation annotation(@Nonnull final AnnotationDefinition annotationDefinition) {
+	public AnnotationValidation annotation(
+			@Nonnull
+			final AnnotationDefinition annotationDefinition) {
 		annotationDefinitions.add(annotationDefinition);
 		return this;
 	}
-
+	
+	
 	/**
 	 * Validates that no other Annotations are defined
 	 *
@@ -78,7 +82,8 @@ public class AnnotationValidation {
 		strictValidation = true;
 		return this;
 	}
-
+	
+	
 	/**
 	 * Validates Annotations of the given Class and checks that:
 	 * <br> - all given Annotations are found
@@ -87,10 +92,13 @@ public class AnnotationValidation {
 	 *
 	 * @param annotatedClass Class to be validated
 	 */
-	public void forClass(@Nonnull final Class<?> annotatedClass) {
+	public void forClass(
+			@Nonnull
+			final Class<?> annotatedClass) {
 		forClassOrMethodOrField(annotatedClass);
 	}
-
+	
+	
 	/**
 	 * Validates Annotations of the given Method and checks that:
 	 * <br> - all given Annotations are found
@@ -99,10 +107,13 @@ public class AnnotationValidation {
 	 *
 	 * @param annotatedMethod Method to be validated
 	 */
-	public void forMethod(@Nonnull final Method annotatedMethod) {
+	public void forMethod(
+			@Nonnull
+			final Method annotatedMethod) {
 		forClassOrMethodOrField(annotatedMethod);
 	}
-
+	
+	
 	/**
 	 * Validates Annotations of the given Field and checks that:
 	 * <br> - all given Annotations are found
@@ -111,42 +122,54 @@ public class AnnotationValidation {
 	 *
 	 * @param annotatedField Field to be validated
 	 */
-	public void forField(@Nonnull final Field annotatedField) {
+	public void forField(
+			@Nonnull
+			final Field annotatedField) {
 		forClassOrMethodOrField(annotatedField);
 	}
-
+	
+	
 	/**
 	 * Validates the configured Annotations
 	 *
 	 * @param annotatedObject can be a Class, a Method or a Field
 	 */
-	private void forClassOrMethodOrField(@Nonnull final Object annotatedObject) {
+	private void forClassOrMethodOrField(
+			@Nonnull
+			final Object annotatedObject) {
 		final SoftAssertions softly = new SoftAssertions();
 		final List<String> annotationsList = new ArrayList<>();
+		allAnnotations = getAllAnnotationsFor(annotatedObject);
+		
 		for (final AnnotationDefinition annotationDefinition : annotationDefinitions) {
 			// check if annotation is present
-			final Annotation annotation = findAnnotationFor(annotatedObject, annotationDefinition.getAnnotation());
-			softly.assertThat(annotation).as("Expected Annotation %s not found", annotationDefinition.getAnnotation().getName()).isNotNull();
-
-			if (annotation == null) {
-				continue;
-			}
-
-			annotationsList.add(annotation.annotationType().getName());
-
-			// check all methods defined in annotation definition against current annotation's methods
-			final List<String> validatedMethods = validateAllMethodsOfAnnotationDefinition(softly, annotationDefinition, annotation);
-
-			// check if there are undefined methods in annotation definition present in annotation
-			checkForUndefinedMethodsInAnnotation(softly, annotation, validatedMethods);
+			final Optional<Annotation> foundAnnotation =
+					findAnnotationFor(annotatedObject, annotationDefinition.getAnnotation());
+			
+			softly.assertThat(foundAnnotation)
+					.as("Expected Annotation %s not found", annotationDefinition.getAnnotation().getName())
+					.isPresent();
+			
+			foundAnnotation.ifPresent(annotation -> {
+				annotationsList.add(annotation.annotationType().getName());
+				
+				// check all methods defined in annotation definition against current annotation's methods
+				final List<String> validatedMethods =
+						validateAllMethodsOfAnnotationDefinition(softly, annotationDefinition, annotation);
+				
+				// check if there are undefined methods in annotation definition present in annotation
+				checkForUndefinedMethodsInAnnotation(softly, annotation, validatedMethods);
+			});
 		}
-
-		softly.assertThat(!strictValidation && CollectionUtils.isEmpty(annotationDefinitions)).as("Please add at least one Annotation to assert or enable strict validation.")
+		
+		softly.assertThat(!strictValidation && annotationDefinitions.isEmpty())
+				.as("Please add at least one Annotation to assert or enable strict validation.")
 				.isFalse();
-
+		
 		if (strictValidation) {
-			final Annotation[] allAnnotations = getAllAnnotationsFor(annotatedObject);
-			softly.assertThat(allAnnotations).extracting(annotation -> annotation.annotationType().getName()).containsExactlyElementsOf(annotationsList);
+			softly.assertThat(allAnnotations)
+					.extracting(annotation -> annotation.annotationType().getName())
+					.containsExactlyElementsOf(annotationsList);
 		}
 		try {
 			softly.assertAll();
@@ -154,44 +177,61 @@ public class AnnotationValidation {
 			throw new SoftAssertionErrorWithObjectDetails(sae.getErrors(), annotatedObject);
 		}
 	}
-
-	private void addIfNotPresent(@Nonnull final Collection<Annotation> collection, @Nonnull final Annotation[] annotations) {
+	
+	
+	private void addIfNotPresent(
+			@Nonnull
+			final Collection<Annotation> collection,
+			@Nonnull
+			final Annotation[] annotations) {
 		for (final Annotation annotation : annotations) {
 			if (!collection.contains(annotation)) {
 				collection.add(annotation);
 			}
 		}
 	}
-
-	private void checkForUndefinedMethodsInAnnotation(@Nonnull final SoftAssertions softly, @Nonnull final Annotation annotation, @Nonnull final List<String> validatedMethods) {
-		final Method[] allMethods = annotation.getClass().getDeclaredMethods();
-
+	
+	
+	private void checkForUndefinedMethodsInAnnotation(
+			@Nonnull
+			final SoftAssertions softly,
+			@Nonnull
+			final Annotation annotation,
+			@Nonnull
+			final List<String> validatedMethods) {
+		final Method[] allMethods = annotation.annotationType().getDeclaredMethods();
+		
 		for (final Method declaredMethod : allMethods) {
 			// we do not want these to be checked
 			final boolean isBlacklisted = paramBlacklist.contains(declaredMethod.getName());
 			// skip already validated methods
 			final boolean isAlreadyValidated = validatedMethods.contains(declaredMethod.getName());
-
+			
 			if (isBlacklisted || isAlreadyValidated) {
 				continue;
 			}
-
+			
 			// all methods in current annotation which are not defined in annotation definition or blacklist are to be reported as error
-			final Object methodResult = ReflectionUtils.invokeMethod(declaredMethod, annotation);
-			if (Object[].class.isInstance(methodResult)) {
-				softly.assertThat((Object[]) methodResult).as("Unexpected values for %s found.", declaredMethod.getName()).isNullOrEmpty();
-			} else {
-				final String description = "Unexpected value for Method '%s' found.";
-				if (methodResult instanceof String) {
-					softly.assertThat((String) methodResult).as(description, declaredMethod.getName()).isNullOrEmpty();
-				} else {
-					softly.assertThat(methodResult).as(description, declaredMethod.getName()).isNull();
-				}
+			Object defaultValue = declaredMethod.getDefaultValue();
+			final Object methodResult;
+			try {
+				methodResult = declaredMethod.invoke(annotation);
+				
+				softly.assertThat(methodResult)
+						.as("Unexpected value for Method '%s' found.", declaredMethod.getName())
+						.isEqualTo(defaultValue);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				e.printStackTrace();
 			}
 		}
 	}
-
-	private boolean equalParamTypes(@Nonnull final Class<?>[] typesOne, @Nonnull final Class<?>[] typesTwo) {
+	
+	
+	private boolean equalParamTypes(
+			@Nonnull
+			final Class<?>[] typesOne,
+			@Nonnull
+			final Class<?>[] typesTwo) {
 		if (typesOne.length == typesTwo.length) {
 			for (int i = 0; i < typesOne.length; i++) {
 				if (typesOne[i] != typesTwo[i]) {
@@ -202,97 +242,112 @@ public class AnnotationValidation {
 		}
 		return false;
 	}
-
+	
+	
 	/**
 	 * Calls dependent on the type of the given Object:
-	 * <br> - {@link AnnotationUtils#findAnnotation(Method, Class)} or
-	 * <br> - {@link AnnotationUtils#findAnnotation(java.lang.reflect.AnnotatedElement, Class)} or
-	 * <br> - {@link AnnotationUtils#findAnnotation(Class, Class)}
 	 */
-	@Nullable
-	private Annotation findAnnotationFor(@Nonnull final Object annotated, @Nonnull final Class<? extends Annotation> annotation) {
-		if (annotated instanceof Method) {
-			return findAnnotation((Method) annotated, annotation);
-		}
-		if (annotated instanceof Field) {
-			return findAnnotation((Field) annotated, annotation);
-		}
-		return findAnnotation((Class<?>) annotated, annotation);
+	@Nonnull
+	private Optional<Annotation> findAnnotationFor(
+			@Nonnull
+			final Object annotated,
+			@Nonnull
+			final Class<? extends Annotation> annotation) {
+		return Arrays.stream(allAnnotations)
+				.filter(annotationFound -> annotationFound.annotationType().getName().equals(annotation.getName()))
+				.findAny();
 	}
-
+	
+	
 	/**
 	 * Calls dependent on the type of the given Object:
-	 * <br> - {@link AnnotationUtils#getAnnotations(Method)} or
-	 * <br> - {@link AnnotationUtils#getAnnotations(java.lang.reflect.AnnotatedElement)}
 	 */
 	@Nullable
-	private Annotation[] getAllAnnotationsFor(@Nonnull final Object annotated) {
+	private Annotation[] getAllAnnotationsFor(
+			@Nonnull
+			final Object annotated) {
 		if (annotated instanceof Field) {
-			return getAnnotations((Field) annotated);
+			return ((Field) annotated).getAnnotations();
 		}
-
+		
 		if (annotated instanceof Method) {
 			final Method annotatedMethod = (Method) annotated;
 			final Class<?> declaringClass = annotatedMethod.getDeclaringClass();
 			final List<Class<?>> allClasses = new ArrayList<>();
 			allClasses.add(declaringClass);
 			allClasses.addAll(ClassUtils.getAllSuperclasses(declaringClass));
-
+			
 			final ArrayList<Annotation> allAnnotations = new ArrayList<>();
-
+			
 			for (final Class<?> aClass : allClasses) {
 				final ArrayList<Method> allMethods = new ArrayList<>();
 				allMethods.addAll(Arrays.asList(aClass.getDeclaredMethods()));
-
+				
 				final List<Class<?>> interfaces = ClassUtils.getAllInterfaces(aClass);
+				
 				for (final Class<?> anInterface : interfaces) {
 					allMethods.addAll(Arrays.asList(anInterface.getDeclaredMethods()));
 				}
-
-				allMethods.stream().filter(method -> isSameMethod(method, annotatedMethod)).forEachOrdered(method -> addIfNotPresent(allAnnotations, getAnnotations(method)));
+				
+				allMethods.stream()
+						.filter(method -> isSameMethod(method, annotatedMethod))
+						.forEachOrdered(method -> addIfNotPresent(allAnnotations, method.getAnnotations()));
 			}
-
+			
 			return allAnnotations.toArray(new Annotation[] {});
 		}
-
+		
 		final Class<?> annotatedClass = (Class<?>) annotated;
 		final List<Class<?>> allClasses = new ArrayList<>();
 		allClasses.add(annotatedClass);
 		allClasses.addAll(ClassUtils.getAllSuperclasses(annotatedClass));
-
+		
 		final ArrayList<Annotation> allAnnotations = new ArrayList<>();
-
+		
 		for (final Class<?> aClass : allClasses) {
-			addIfNotPresent(allAnnotations, getAnnotations(aClass));
+			addIfNotPresent(allAnnotations, aClass.getAnnotations());
 			final List<Class<?>> interfaces = ClassUtils.getAllInterfaces(aClass);
 			for (final Class<?> anInterface : interfaces) {
-				addIfNotPresent(allAnnotations, getAnnotations(anInterface));
+				addIfNotPresent(allAnnotations, anInterface.getAnnotations());
 			}
 		}
-
+		
 		return allAnnotations.toArray(new Annotation[] {});
 	}
-
-	private boolean isSameMethod(@Nonnull final Method one, @Nonnull final Method two) {
-		return Objects.equals(one.getName(), two.getName()) && equalParamTypes(one.getParameterTypes(), two.getParameterTypes());
+	
+	
+	private boolean isSameMethod(
+			@Nonnull
+			final Method one,
+			@Nonnull
+			final Method two) {
+		return Objects.equals(one.getName(), two.getName()) && equalParamTypes(one.getParameterTypes(),
+				two.getParameterTypes());
 	}
-
-	private List<String> validateAllMethodsOfAnnotationDefinition(@Nonnull final SoftAssertions softly, @Nonnull final AnnotationDefinition annotationDefinition,
-			@Nonnull final Annotation annotation) {
+	
+	
+	private List<String> validateAllMethodsOfAnnotationDefinition(
+			@Nonnull
+			final SoftAssertions softly,
+			@Nonnull
+			final AnnotationDefinition annotationDefinition,
+			@Nonnull
+			final Annotation annotation) {
 		final List<String> validatedMethods = Lists.newArrayList();
-
+		
 		// check all methods defined in annotation definition
-		for (final AnnotationDefinition.AnnotationMethodDefinition annotationMethodDefinition : annotationDefinition.getAnnotationMethodDefinitions()) {
+		for (final AnnotationDefinition.AnnotationMethodDefinition annotationMethodDefinition : annotationDefinition
+				.getAnnotationMethodDefinitions()) {
 			final String methodName = annotationMethodDefinition.getMethod();
 			final Object[] values = annotationMethodDefinition.getValues();
-
+			
 			Method method = null;
 			try {
 				method = annotation.annotationType().getMethod(methodName);
 			} catch (final NoSuchMethodException e) {
 				// noop
 			}
-
+			
 			// check that defined method is present in annotation
 			softly.assertThat(method).as("Method %s not found.", methodName).isNotNull();
 
@@ -301,25 +356,40 @@ public class AnnotationValidation {
 			}
 
 			// check that actual method in annotation has defined return types
-			final Object methodResult = ReflectionUtils.invokeMethod(method, annotation);
-			if (Object[].class.isInstance(methodResult)) {
-				// this produces readable descriptions on its own
-				// all and only defined values must be returned in defined order
-				softly.assertThat((Object[]) methodResult).containsExactlyElementsOf(Arrays.asList(values));
-			} else {
-				// this produces readable descriptions on its own
-				softly.assertThat(methodResult).isEqualTo(values[0]);
+			final Object methodResult;
+			try {
+				methodResult = method.invoke(annotation);
+				if (Object[].class.isInstance(methodResult)) {
+					// this produces readable descriptions on its own
+					// all and only defined values must be returned in defined order
+					softly.assertThat((Object[]) methodResult).containsExactlyElementsOf(Arrays.asList(values));
+				} else {
+					// this produces readable descriptions on its own
+					softly.assertThat(methodResult).isEqualTo(values[0]);
+				}
+				validatedMethods.add(method.getName());
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				e.printStackTrace();
 			}
-			validatedMethods.add(method.getName());
+			
 			// check if this annotation's method is an alias
-			final AliasFor alias = AnnotationUtils.findAnnotation(method, AliasFor.class);
-			if (alias != null) {
-				// mark the aliased method as validated
-				validatedMethods.add(alias.value());
-			}
-
+			Arrays.stream(method.getDeclaredAnnotations())
+					.filter(annotationFound -> annotationFound.annotationType().getName().endsWith("AliasFor"))
+					.findAny()
+					.ifPresent(annotationFound -> {
+						try {
+							validatedMethods.add(annotationFound
+									.annotationType()
+									.getDeclaredMethod("attribute")
+									.invoke(annotationFound)
+									.toString());
+						} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+							e.printStackTrace();
+						}
+					});
 		}
+		
 		return validatedMethods;
 	}
-
+	
 }
