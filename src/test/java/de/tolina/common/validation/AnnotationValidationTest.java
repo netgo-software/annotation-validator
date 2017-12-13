@@ -15,6 +15,8 @@
  */
 package de.tolina.common.validation;
 
+import java.lang.reflect.Method;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -226,17 +228,17 @@ public class AnnotationValidationTest {
 	
 	@Test
 	public void testValidateLambdas() throws Exception {
-//		TestInterface test1 = TestInterface::staticMethod;
-//		Method annotatedMethod1= test1.getClass().getMethod("method");
-//		validate().exactly().annotation(type(Deprecated.class)).forMethod(annotatedMethod1);
-//
-//		TestInterface test2 = test1::defaultMethod;
-//		Method annotatedMethod2= test2.getClass().getMethod("defaultMethod");
-//		validate().exactly().annotation(type(Deprecated.class)).forMethod(annotatedMethod2);
+		TestInterface test1 = TestInterface::staticMethod;
+		Method annotatedMethod1= test1.getClass().getMethod("method");
+		validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod1);
+		
+		TestInterface test2 = test1::defaultMethod;
+		Method annotatedMethod2= test2.getClass().getMethod("defaultMethod");
+		validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod2);
 	}
 	
-	
-	static interface TestInterface {
+
+	interface TestInterface {
 		
 		@Deprecated
 		static void staticMethod() {

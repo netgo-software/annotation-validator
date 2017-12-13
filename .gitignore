@@ -6,3 +6,6 @@
 # Maven files
 /target/
 /pom.xml.versionsBackup
+
+# IDEA files
+/annotation-validator.iml
