@@ -32,7 +32,7 @@ class AnnotatedTestClass {
 }
 ```
 
-If you would like to check the class to be annotated only with `@MyAnnotation` use the following
+If you would like to check the class to be annotated only with `@MyAnnotation` and only have the configured params use the following
 
 ```
 import static de.tolina.common.validation.AnnotationDefinition.*;
@@ -41,7 +41,19 @@ import static de.tolina.common.validation.AnnotationDefinition.*;
 
 validate().exactly() //
 	.annotation(type(MyAnnotation.class) //
-		.param("foo", "default") //
+		.param("foo", "default")) //
+	.forClass(AnnotatedTestClass.class);
+```
+
+If you would like to check the class to be annotated only with `@MyAnnotation` but also want to consider default values for not configured params use the following
+
+```
+import static de.tolina.common.validation.AnnotationDefinition.*;
+
+...
+
+validate().only() //
+	.annotation(type(MyAnnotation.class)) //
 	.forClass(AnnotatedTestClass.class);
 ```
 
@@ -50,7 +62,7 @@ If you would like to check the field to be annotated with `@MyAnnotation`, where
 ```
 validate() //
 	.annotation(type(MyAnnotation.class) //
-		.param("foo", "bar") //
+		.param("foo", "bar")) //
 	.forField(AnnotatedTestClass.class.getDeclaredField("fieldWithAnnotations"));
 
 ```
