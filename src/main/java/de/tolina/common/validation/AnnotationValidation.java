@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 package de.tolina.common.validation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,6 +39,7 @@ import org.assertj.core.util.VisibleForTesting;
 import static de.tolina.common.validation.ValidationMode.DEFAULT;
 import static de.tolina.common.validation.ValidationMode.EXACTLY;
 import static de.tolina.common.validation.ValidationMode.ONLY;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -51,11 +53,12 @@ public class AnnotationValidation {
 	private List<AnnotationDefinition> annotationDefinitions;
 	private ValidationMode validationMode;
 	private Annotation[] allAnnotations;
+	private static final String
+			ACCESS_OR_INVOCATION_EXCEPTION_MESSAGE = "Could not access/invoke aliased method for '%s'.";
 	
 	
 	AnnotationValidation(
-			@Nonnull
-			final HashSet<String> parametersBlacklist) {
+			@Nonnull final HashSet<String> parametersBlacklist) {
 		validationMode = DEFAULT;
 		paramBlacklist = parametersBlacklist;
 		annotationDefinitions = new ArrayList<>();
@@ -71,8 +74,7 @@ public class AnnotationValidation {
 	 */
 	@Nonnull
 	public AnnotationValidation annotation(
-			@Nonnull
-			final AnnotationDefinition annotationDefinition) {
+			@Nonnull final AnnotationDefinition annotationDefinition) {
 		annotationDefinitions.add(annotationDefinition);
 		return this;
 	}
@@ -111,9 +113,13 @@ public class AnnotationValidation {
 	 * @param annotatedClass Class to be validated
 	 */
 	public void forClass(
-			@Nonnull
-			final Class<?> annotatedClass) {
+			@Nonnull final Class<?> annotatedClass) {
 		forClassOrMethodOrField(annotatedClass);
+	}
+	
+	
+	public void forConstructor(@Nonnull final Constructor annotatedContructor) {
+		forClassOrMethodOrField(annotatedContructor);
 	}
 	
 	
@@ -126,8 +132,7 @@ public class AnnotationValidation {
 	 * @param annotatedMethod Method to be validated
 	 */
 	public void forMethod(
-			@Nonnull
-			final Method annotatedMethod) {
+			@Nonnull final Method annotatedMethod) {
 		forClassOrMethodOrField(annotatedMethod);
 	}
 	
@@ -141,8 +146,7 @@ public class AnnotationValidation {
 	 * @param annotatedField Field to be validated
 	 */
 	public void forField(
-			@Nonnull
-			final Field annotatedField) {
+			@Nonnull final Field annotatedField) {
 		forClassOrMethodOrField(annotatedField);
 	}
 	
@@ -153,8 +157,7 @@ public class AnnotationValidation {
 	 * @param annotatedObject can be a Class, a Method or a Field
 	 */
 	private void forClassOrMethodOrField(
-			@Nonnull
-			final Object annotatedObject) {
+			@Nonnull final Object annotatedObject) {
 		final SoftAssertions softly = new SoftAssertions();
 		final List<String> annotationsList = new ArrayList<>();
 		allAnnotations = getAllAnnotationsFor(annotatedObject);
@@ -162,7 +165,7 @@ public class AnnotationValidation {
 		for (final AnnotationDefinition annotationDefinition : annotationDefinitions) {
 			// check if annotation is present
 			final Optional<Annotation> foundAnnotation =
-					findAnnotationFor(annotatedObject, annotationDefinition.getAnnotation());
+					findAnnotationFor(annotationDefinition.getAnnotation());
 			
 			softly.assertThat(foundAnnotation)
 					.as("Expected Annotation %s not found", annotationDefinition.getAnnotation().getName())
@@ -198,10 +201,8 @@ public class AnnotationValidation {
 	
 	
 	private void addIfNotPresent(
-			@Nonnull
-			final Collection<Annotation> collection,
-			@Nonnull
-			final Annotation[] annotations) {
+			@Nonnull final Collection<Annotation> collection,
+			@Nonnull final Annotation[] annotations) {
 		for (final Annotation annotation : annotations) {
 			if (!collection.contains(annotation)) {
 				collection.add(annotation);
@@ -211,12 +212,9 @@ public class AnnotationValidation {
 	
 	
 	private void checkForUndefinedMethodsInAnnotation(
-			@Nonnull
-			final SoftAssertions softly,
-			@Nonnull
-			final Annotation annotation,
-			@Nonnull
-			final List<String> validatedMethods) {
+			@Nonnull final SoftAssertions softly,
+			@Nonnull final Annotation annotation,
+			@Nonnull final List<String> validatedMethods) {
 		final Method[] allMethods = annotation.annotationType().getDeclaredMethods();
 		
 		for (final Method declaredMethod : allMethods) {
@@ -255,17 +253,15 @@ public class AnnotationValidation {
 					}
 				}
 			} catch (IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
+				softly.fail(format(ACCESS_OR_INVOCATION_EXCEPTION_MESSAGE, declaredMethod.getName()));
 			}
 		}
 	}
 	
 	
 	private boolean equalParamTypes(
-			@Nonnull
-			final Class<?>[] typesOne,
-			@Nonnull
-			final Class<?>[] typesTwo) {
+			@Nonnull final Class<?>[] typesOne,
+			@Nonnull final Class<?>[] typesTwo) {
 		if (typesOne.length == typesTwo.length) {
 			for (int i = 0; i < typesOne.length; i++) {
 				if (typesOne[i] != typesTwo[i]) {
@@ -283,10 +279,7 @@ public class AnnotationValidation {
 	 */
 	@Nonnull
 	private Optional<Annotation> findAnnotationFor(
-			@Nonnull
-			final Object annotated,
-			@Nonnull
-			final Class<? extends Annotation> annotation) {
+			@Nonnull final Class<? extends Annotation> annotation) {
 		return Arrays.stream(allAnnotations)
 				.filter(annotationFound -> annotationFound.annotationType().getName().equals(annotation.getName()))
 				.findAny();
@@ -298,10 +291,13 @@ public class AnnotationValidation {
 	 */
 	@Nullable
 	private Annotation[] getAllAnnotationsFor(
-			@Nonnull
-			final Object annotated) {
+			@Nonnull final Object annotated) {
 		if (annotated instanceof Field) {
 			return ((Field) annotated).getAnnotations();
+		}
+		
+		if (annotated instanceof Constructor) {
+			return ((Constructor) annotated).getAnnotations();
 		}
 		
 		if (annotated instanceof Method) {
@@ -351,22 +347,17 @@ public class AnnotationValidation {
 	
 	
 	private boolean isSameMethod(
-			@Nonnull
-			final Method one,
-			@Nonnull
-			final Method two) {
+			@Nonnull final Method one,
+			@Nonnull final Method two) {
 		return Objects.equals(one.getName(), two.getName()) && equalParamTypes(one.getParameterTypes(),
 				two.getParameterTypes());
 	}
 	
 	
 	private List<String> validateAllMethodsOfAnnotationDefinition(
-			@Nonnull
-			final SoftAssertions softly,
-			@Nonnull
-			final AnnotationDefinition annotationDefinition,
-			@Nonnull
-			final Annotation annotation) {
+			@Nonnull final SoftAssertions softly,
+			@Nonnull final AnnotationDefinition annotationDefinition,
+			@Nonnull final Annotation annotation) {
 		final List<String> validatedMethods = Lists.newArrayList();
 		
 		// check all methods defined in annotation definition
@@ -395,7 +386,7 @@ public class AnnotationValidation {
 							.isNotNull();
 					continue;
 				} catch (IllegalAccessException | InvocationTargetException e) {
-					e.printStackTrace();
+					softly.fail(format(ACCESS_OR_INVOCATION_EXCEPTION_MESSAGE, actualMethod.getName()));
 				}
 			}
 			
@@ -410,7 +401,7 @@ public class AnnotationValidation {
 				
 				assertMethodResult(actualMethodResult, expectedValues);
 			} catch (IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
+				softly.fail(format(ACCESS_OR_INVOCATION_EXCEPTION_MESSAGE, actualMethod.getName()));
 			} catch (AssertionError e) {
 				if (aliasForAnnotation.isPresent()) {
 					try {
@@ -420,7 +411,7 @@ public class AnnotationValidation {
 						
 						assertableResult = aliasMethodResult;
 					} catch (IllegalAccessException | InvocationTargetException e1) {
-						e1.printStackTrace();
+						softly.fail(ACCESS_OR_INVOCATION_EXCEPTION_MESSAGE, aliasMethod.getName());
 					} catch (AssertionError e1) {
 						// noop
 					}
