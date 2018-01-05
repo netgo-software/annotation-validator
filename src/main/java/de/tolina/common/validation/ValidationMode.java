@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.tolina.common.validation;
 
-@SuppressWarnings("javadoc")
-public enum TestEnum {
-	TEST, TEST2
+public enum ValidationMode {
+	DEFAULT, ONLY, EXACTLY
 }
