@@ -254,7 +254,7 @@
                         <artifactId>maven-gpg-plugin</artifactId>
                         <version>${maven-gpg-plugin.version}</version>
                         <configuration>
-                            <executable>gpg2</executable>
+                            <executable>gpg</executable> <!-- or gpg2 -->
                         </configuration>
                         <executions>
                             <execution>
