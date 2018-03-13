@@ -1,5 +1,6 @@
 # Changelog
 
+## [2.0] - 2018-03-13
 ### Changed
 - Dependencies updated: assertj-core, commons-lang3, jsr305, spring-core
 
