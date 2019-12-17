@@ -85,6 +85,11 @@
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         <maven-surefire-plugin.version>2.12.4</maven-surefire-plugin.version>
         <sonar-jacoco-listeners.version>5.14.0.18788</sonar-jacoco-listeners.version>
+
+        <sonar.projectKey>fjakop_annotation-validator</sonar.projectKey>
+        <sonar.organization>fjakop-github</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
     </properties>
 
     <dependencies>
