@@ -22,7 +22,7 @@
 
     <groupId>de.tolina.common.validation</groupId>
     <artifactId>annotation-validator</artifactId>
-    <version>2.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Annotation Validator</name>
@@ -115,7 +115,7 @@
 
         <dependency>
             <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
+            <artifactId>hamcrest</artifactId>
             <version>2.1</version>
             <scope>test</scope>
         </dependency>
@@ -135,6 +135,9 @@
                 <artifactId>maven-license-verifier-plugin</artifactId>
                 <version>${maven-license-verifier-plugin.version}</version>
                 <configuration>
+                    <excludes>
+                        <exclude>org.hamcrest:hamcrest:jar:2.1</exclude>
+                    </excludes>
                     <licenseFile>src/main/resources/licenses.xml</licenseFile>
                     <failOnInvalid>true</failOnInvalid>
                     <failOnUnknown>true</failOnUnknown>
