@@ -1,5 +1,4 @@
-[![build status](https://travis-ci.org/arxes-tolina/annotation-validator.svg?branch=master)](https://github.com/arxes-tolina/annotation-validator/commits/master)
-[![quality status](https://sonarcloud.io//api/badges/gate?key=de.tolina.common.validation%3Aannotation-validator)](https://sonarcloud.io/dashboard?id=de.tolina.common.validation%3Aannotation-validator)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=fjakop_annotation-validator&metric=alert_status)](https://sonarcloud.io/dashboard?id=fjakop_annotation-validator)
 
 # Usage with Maven
 
