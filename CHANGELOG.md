@@ -1,7 +1,8 @@
 # Changelog
 
 ### Changed
-- Dependencies updated: assertj-core, commons-lang3, spring-core, hamcrest, jacoco-maven-pugin, sonar-jacoco-listeners
+- Moved to new coordinates de.jakop.validation:annotation-validator
+- Multiple dependencies updated
 
 ## [2.0] - 2018-03-13
 ### Changed
