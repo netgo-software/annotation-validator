@@ -15,13 +15,18 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
-import java.lang.annotation.Retention;
+import static org.junit.Assert.assertThat;
 
-@Retention(RUNTIME)
-@SuppressWarnings("javadoc")
-@interface AnnotatedAbstractTestClassAnnotation {
+public class AnnotationValidatorTest {
+    @Test
+    public void testValidate_DefaultBlacklist() {
+        final AnnotationValidation validate = AnnotationValidator.validate();
+        assertThat(validate.paramBlacklist, CoreMatchers.hasItems("equals", "toString", "hashCode", "annotationType"));
+    }
+
 }

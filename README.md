@@ -6,7 +6,7 @@ Add the following dependency to your pom.xml
 
 ```
 <dependency>
-	<groupId>de.tolina.common.validation</groupId>
+	<groupId>de.jakop.validation</groupId>
 	<artifactId>annotation-validator</artifactId>
 	<version>1.0</version>
 	<scope>test</scope>
@@ -34,7 +34,7 @@ class AnnotatedTestClass {
 If you would like to check the class to be annotated only with `@MyAnnotation` and only have the configured params use the following
 
 ```
-import static de.tolina.common.validation.AnnotationDefinition.*;
+import static AnnotationDefinition.*;
 
 ...
 
@@ -47,7 +47,7 @@ validate().exactly() //
 If you would like to check the class to be annotated only with `@MyAnnotation` but also want to consider default values for not configured params use the following
 
 ```
-import static de.tolina.common.validation.AnnotationDefinition.*;
+import static AnnotationDefinition.*;
 
 ...
 

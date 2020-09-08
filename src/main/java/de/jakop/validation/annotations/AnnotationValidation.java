@@ -15,7 +15,7 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static de.tolina.common.validation.ValidationMode.*;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +53,7 @@ public class AnnotationValidation {
 
     AnnotationValidation(
             @Nonnull final HashSet<String> parametersBlacklist) {
-        validationMode = DEFAULT;
+        validationMode = ValidationMode.DEFAULT;
         paramBlacklist = parametersBlacklist;
         annotationDefinitions = new ArrayList<>();
     }
@@ -81,7 +80,7 @@ public class AnnotationValidation {
      */
     @Nonnull
     public AnnotationValidation exactly() {
-        validationMode = EXACTLY;
+        validationMode = ValidationMode.EXACTLY;
         return this;
     }
 
@@ -93,7 +92,7 @@ public class AnnotationValidation {
      */
     @Nonnull
     public AnnotationValidation only() {
-        validationMode = ONLY;
+        validationMode = ValidationMode.ONLY;
         return this;
     }
 
@@ -177,11 +176,11 @@ public class AnnotationValidation {
             });
         }
 
-        softly.assertThat(validationMode == DEFAULT && annotationDefinitions.isEmpty())
+        softly.assertThat(validationMode == ValidationMode.DEFAULT && annotationDefinitions.isEmpty())
                 .as("Please add at least one Annotation to assert or enable strict validation.")
                 .isFalse();
 
-        if (validationMode != DEFAULT) {
+        if (validationMode != ValidationMode.DEFAULT) {
             softly.assertThat(allAnnotations)
                     .extracting(annotation -> annotation.annotationType().getName())
                     .containsExactlyElementsOf(annotationsList);
@@ -226,7 +225,7 @@ public class AnnotationValidation {
             try {
                 methodResult = declaredMethod.invoke(annotation);
 
-                if (validationMode != EXACTLY) {
+                if (validationMode != ValidationMode.EXACTLY) {
                     Object defaultValue = declaredMethod.getDefaultValue();
 
                     softly.assertThat(methodResult)

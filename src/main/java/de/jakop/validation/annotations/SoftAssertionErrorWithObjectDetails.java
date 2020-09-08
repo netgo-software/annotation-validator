@@ -18,7 +18,7 @@
 /*
  *  (c) tolina GmbH, 2017
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 import java.util.List;
 

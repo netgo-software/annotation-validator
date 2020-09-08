@@ -15,7 +15,7 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

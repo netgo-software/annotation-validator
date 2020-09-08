@@ -15,7 +15,7 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,10 +23,8 @@ import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Method;
 
-import static de.tolina.common.validation.AnnotationDefinition.type;
-import static de.tolina.common.validation.AnnotationValidator.validate;
-import static de.tolina.common.validation.TestEnum.TEST;
-import static de.tolina.common.validation.TestEnum.TEST2;
+import static de.jakop.validation.annotations.TestEnum.TEST;
+import static de.jakop.validation.annotations.TestEnum.TEST2;
 
 /**
  * Test for the {@link AnnotationValidator}
@@ -39,23 +37,23 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedClass_exactly_defaultsAreNotEvaluated() throws NoSuchMethodException {
-        validate().exactly() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("testparameter", "default") //
                         .param("anotherTestParameter", "one", "two")) //
-                .annotation(type(AnnotatedTestInterfaceAnnotation.class)) //
-                .annotation(type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
-                .annotation(type(AnnotatedAbstractTestClassAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedAbstractTestClassAnnotation.class)) //
                 .forClass(AnnotatedTestClass.class);
     }
 
     @Test
     public void testValidateAnnotatedClass_only_defaultsAreEvaluated() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(TestAnnotation.class)) //
-                .annotation(type(AnnotatedTestInterfaceAnnotation.class)) //
-                .annotation(type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
-                .annotation(type(AnnotatedAbstractTestClassAnnotation.class)) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
+                .annotation(AnnotationDefinition.type(AnnotatedAbstractTestClassAnnotation.class)) //
                 .forClass(AnnotatedTestClass.class);
     }
 
@@ -64,15 +62,15 @@ public class AnnotationValidationTest {
     public void testValidateAnnotatedClass_NotExactlyAndNoAnnotationsValidated() throws NoSuchMethodException {
         thrown.expect(AssertionError.class);
         thrown.expectMessage("Please add at least one Annotation to assert or enable strict validation.");
-        validate() //
+        AnnotationValidator.validate() //
                 .forClass(AnnotatedTestClass.class);
     }
 
 
     @Test
     public void testValidateAnnotatedClass_NotExactly() throws NoSuchMethodException {
-        validate() //
-                .annotation(type(AnnotatedTestInterfaceAnnotation.class)) //
+        AnnotationValidator.validate() //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceAnnotation.class)) //
                 .forClass(AnnotatedTestClass.class);
     }
 
@@ -82,8 +80,8 @@ public class AnnotationValidationTest {
         thrown.expect(AssertionError.class);
         thrown.expectMessage("Method noSuchMethod not found");
 
-        validate().exactly() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("noSuchMethod", "default")) //
                 .forClass(AnnotatedTestClass.class);
     }
@@ -91,11 +89,11 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedMethod_exactly_defaultsAreNotEvaluated() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("testparameter", "testvalue") //
                         .param("anotherTestParameter", "anotherTestValue")) //
-                .annotation(type(AnotherTestAnnotation.class) //
+                .annotation(AnnotationDefinition.type(AnotherTestAnnotation.class) //
                         .param("testEnum", TEST2)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
     }
@@ -103,11 +101,11 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedMethod_only_defaultsAreEvaluated() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("testparameter", "testvalue") //
                         .param("anotherTestParameter", "anotherTestValue")) //
-                .annotation(type(AnotherTestAnnotation.class) //
+                .annotation(AnnotationDefinition.type(AnotherTestAnnotation.class) //
                         .param("testEnum", TEST2)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
     }
@@ -119,8 +117,8 @@ public class AnnotationValidationTest {
         thrown.expect(AssertionError.class);
         thrown.expectMessage("Unexpected value for Method 'testparameter' found");
 
-        validate() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("anotherTestParameter", "anotherTestValue")) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
     }
@@ -129,16 +127,16 @@ public class AnnotationValidationTest {
     @Test
     public void testValidateAnnotatedMethod_NotAllAnnotationMethodsDefinedInAnnotationDefinition_NonStringValues()
             throws NoSuchMethodException {
-        validate() //
-                .annotation(type(AnotherTestAnnotation.class).param("value", TEST2)) //
+        AnnotationValidator.validate() //
+                .annotation(AnnotationDefinition.type(AnotherTestAnnotation.class).param("value", TEST2)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAnnotations"));
     }
 
 
     @Test
     public void testValidateAnnotatedMethod_OverloadedMethod() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(AnotherTestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(AnotherTestAnnotation.class) //
                         .param("testEnum", TEST) //
                         .param("value", TEST)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("overloadedMethod", String.class, String.class));
@@ -147,8 +145,8 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedMethod_UseAlias() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(AliasTestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(AliasTestAnnotation.class) //
                         .param("referencedTestEnum", TEST2)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAliasAnnotations"));
     }
@@ -156,8 +154,8 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedMethod_UseAlias_WithoutAttribute() throws NoSuchMethodException {
-        validate().only() //
-                .annotation(type(AliasTestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(AliasTestAnnotation.class) //
                         .param("anotherValue", TEST)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithAnOtherAliasAnnotations"));
     }
@@ -165,32 +163,32 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedInterfaceMethod() throws NoSuchMethodException {
-        validate().exactly() //
-                .annotation(type(AnnotatedTestInterfaceAnnotation.class)) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceAnnotation.class)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("annotatedInterfaceMethod"));
     }
 
 
     @Test
     public void testValidateAnnotatedInterfaceMethodFromSuperclass() throws NoSuchMethodException {
-        validate().exactly() //
-                .annotation(type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(AnnotatedTestInterfaceForAbstractClassAnnotation.class)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("annotatedInterfaceMethodForAbstractClass"));
     }
 
 
     @Test
     public void testValidateAnnotatedAbstractMethodFromSuperclass() throws NoSuchMethodException {
-        validate().exactly() //
-                .annotation(type(AnnotatedAbstractTestClassAnnotation.class)) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(AnnotatedAbstractTestClassAnnotation.class)) //
                 .forMethod(AnnotatedTestClass.class.getDeclaredMethod("annotatedAbstractMethod"));
     }
 
 
     @Test
     public void testValidateAnnotatedField_exactly_defaultsAreNotEvaluated() throws NoSuchFieldException {
-        validate().exactly() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().exactly() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("testparameter", "testvalue")
                         .param("anotherTestParameter", "one", "two")) //
                 .forField(AnnotatedTestClass.class.getDeclaredField("fieldWithAnnotations"));
@@ -199,8 +197,8 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateAnnotatedField_only_defaultsAreEvaluated() throws NoSuchFieldException {
-        validate().only() //
-                .annotation(type(TestAnnotation.class) //
+        AnnotationValidator.validate().only() //
+                .annotation(AnnotationDefinition.type(TestAnnotation.class) //
                         .param("testparameter", "testvalue")) //
                 .forField(AnnotatedTestClass.class.getDeclaredField("fieldWithAnnotations"));
     }
@@ -208,7 +206,7 @@ public class AnnotationValidationTest {
 
     @Test
     public void testValidateMethod() throws NoSuchMethodException {
-        validate().exactly()//
+        AnnotationValidator.validate().exactly()//
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithoutAnnotations"));
     }
 
@@ -216,9 +214,9 @@ public class AnnotationValidationTest {
     @Test
     public void testValidateMethod_AnnotationNotPresent() throws NoSuchMethodException {
         thrown.expect(AssertionError.class);
-        thrown.expectMessage("Expected Annotation de.tolina.common.validation.TestAnnotation not found");
-        validate().exactly()//
-                .annotation(type(TestAnnotation.class)) //
+        thrown.expectMessage("Expected Annotation de.jakop.annotation.validator.TestAnnotation not found");
+        AnnotationValidator.validate().exactly()//
+                .annotation(AnnotationDefinition.type(TestAnnotation.class)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithoutAnnotations"));
     }
 
@@ -226,14 +224,14 @@ public class AnnotationValidationTest {
     @Test
     public void testValidateMethod_NoSuchMethod() throws NoSuchMethodException {
         thrown.expect(NoSuchMethodException.class);
-        validate().exactly()//
+        AnnotationValidator.validate().exactly()//
                 .forMethod(AnnotatedTestClass.class.getMethod("noSuchMethod"));
     }
 
 
     @Test
     public void testValidateField() throws NoSuchFieldException {
-        validate().exactly().forField(AnnotatedTestClass.class.getDeclaredField("fieldWithoutAnnotations"));
+        AnnotationValidator.validate().exactly().forField(AnnotatedTestClass.class.getDeclaredField("fieldWithoutAnnotations"));
     }
 
 
@@ -241,11 +239,11 @@ public class AnnotationValidationTest {
     public void testValidateLambdas() throws Exception {
         TestInterface test1 = TestInterface::staticMethod;
         Method annotatedMethod1 = test1.getClass().getMethod("method");
-        validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod1);
+        AnnotationValidator.validate().annotation(AnnotationDefinition.type(Deprecated.class)).forMethod(annotatedMethod1);
 
         TestInterface test2 = test1::defaultMethod;
         Method annotatedMethod2 = test2.getClass().getMethod("defaultMethod");
-        validate().annotation(type(Deprecated.class)).forMethod(annotatedMethod2);
+        AnnotationValidator.validate().annotation(AnnotationDefinition.type(Deprecated.class)).forMethod(annotatedMethod2);
     }
 
 

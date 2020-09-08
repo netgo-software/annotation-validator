@@ -15,19 +15,11 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-
-import static de.tolina.common.validation.AnnotationValidator.validate;
-import static org.junit.Assert.assertThat;
-
-public class AnnotationValidatorTest {
-    @Test
-    public void testValidate_DefaultBlacklist() {
-        final AnnotationValidation validate = validate();
-        assertThat(validate.paramBlacklist, CoreMatchers.hasItems("equals", "toString", "hashCode", "annotationType"));
-    }
-
+@AnnotatedTestInterfaceForAbstractClassAnnotation
+@SuppressWarnings("javadoc")
+interface AnnotatedTestInterfaceForAbstractClass {
+	@AnnotatedTestInterfaceForAbstractClassAnnotation
+	void annotatedInterfaceMethodForAbstractClass();
 }

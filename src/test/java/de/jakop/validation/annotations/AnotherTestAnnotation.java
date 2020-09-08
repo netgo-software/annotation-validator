@@ -15,13 +15,25 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.Retention;
 
+import static de.jakop.validation.annotations.TestEnum.TEST;
+import static de.jakop.validation.annotations.TestEnum.TEST2;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 @Retention(RUNTIME)
 @SuppressWarnings("javadoc")
-@interface AnnotatedTestInterfaceForAbstractClassAnnotation {
+public @interface AnotherTestAnnotation {
+
+    @AliasFor("testEnum")
+    TestEnum value() default TEST;
+
+    @AliasFor("value")
+    TestEnum testEnum() default TEST;
+
+    TestEnum anotherValue() default TEST2;
 }

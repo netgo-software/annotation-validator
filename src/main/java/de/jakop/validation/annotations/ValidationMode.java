@@ -15,7 +15,7 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 public enum ValidationMode {
 	DEFAULT, ONLY, EXACTLY

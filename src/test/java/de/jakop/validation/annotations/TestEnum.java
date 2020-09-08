@@ -15,19 +15,9 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-@AnnotatedAbstractTestClassAnnotation
 @SuppressWarnings("javadoc")
-abstract class AnnotatedAbstractTestClass implements AnnotatedTestInterface, AnnotatedTestInterfaceForAbstractClass {
-	@AnnotatedAbstractTestClassAnnotation
-	protected abstract void annotatedAbstractMethod();
-
-	protected void annotatedAbstractMethod(final String param) {
-
-	};
-
-	protected String annotatedAbstractMethod(final Object param) {
-		return "";
-	};
+public enum TestEnum {
+	TEST, TEST2
 }

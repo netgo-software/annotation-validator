@@ -15,7 +15,7 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -23,5 +23,5 @@ import java.lang.annotation.Retention;
 
 @Retention(RUNTIME)
 @SuppressWarnings("javadoc")
-@interface AnnotatedTestInterfaceAnnotation {
+@interface AnnotatedAbstractTestClassAnnotation {
 }

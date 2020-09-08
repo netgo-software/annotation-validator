@@ -15,10 +15,10 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-import static de.tolina.common.validation.TestEnum.TEST;
-import static de.tolina.common.validation.TestEnum.TEST2;
+import static de.jakop.validation.annotations.TestEnum.TEST;
+import static de.jakop.validation.annotations.TestEnum.TEST2;
 
 @TestAnnotation
 @SuppressWarnings("javadoc")

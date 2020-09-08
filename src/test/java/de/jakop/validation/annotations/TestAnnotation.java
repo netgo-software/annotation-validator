@@ -15,23 +15,16 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
-import org.springframework.core.annotation.AliasFor;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 
-import static de.tolina.common.validation.TestEnum.TEST;
-import static de.tolina.common.validation.TestEnum.TEST2;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 @Retention(RUNTIME)
 @SuppressWarnings("javadoc")
-@AnotherTestAnnotation
-public @interface AliasTestAnnotation {
-    @AliasFor(annotation = AnotherTestAnnotation.class, attribute = "testEnum")
-    TestEnum referencedTestEnum() default TEST;
+public @interface TestAnnotation {
+	String testparameter() default "default";
 
-    @AliasFor(annotation = AnotherTestAnnotation.class)
-    TestEnum anotherValue() default TEST2;
+	String[] anotherTestParameter() default { "one", "two" };
 }

@@ -15,9 +15,11 @@
  *
  * Modifications copyright (C) 2020 Frank Jakop
  */
-package de.tolina.common.validation;
+package de.jakop.validation.annotations;
 
+@AnnotatedTestInterfaceAnnotation
 @SuppressWarnings("javadoc")
-public enum TestEnum {
-	TEST, TEST2
+interface AnnotatedTestInterface {
+	@AnnotatedTestInterfaceAnnotation
+	void annotatedInterfaceMethod();
 }
