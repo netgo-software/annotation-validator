@@ -214,7 +214,7 @@ public class AnnotationValidationTest {
     @Test
     public void testValidateMethod_AnnotationNotPresent() throws NoSuchMethodException {
         thrown.expect(AssertionError.class);
-        thrown.expectMessage("Expected Annotation de.jakop.annotation.validator.TestAnnotation not found");
+        thrown.expectMessage("Expected Annotation de.jakop.validation.annotations.TestAnnotation not found");
         AnnotationValidator.validate().exactly()//
                 .annotation(AnnotationDefinition.type(TestAnnotation.class)) //
                 .forMethod(AnnotatedTestClass.class.getMethod("methodWithoutAnnotations"));
