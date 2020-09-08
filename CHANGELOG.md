@@ -1,5 +1,6 @@
 # Changelog
 
+## [2.0.1] - 2020-09-09
 ### Changed
 - Moved to new coordinates de.jakop.validation:annotation-validator
 - Multiple dependencies updated
