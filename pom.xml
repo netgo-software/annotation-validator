@@ -48,11 +48,11 @@
         </developer>
     </developers>
 
-    <url>http://github.com/fjakop/annotation-validator</url>
+    <url>https://github.com/fjakop/annotation-validator</url>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/fjakop/annotation-validator.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/fjakop/annotation-validator.git</developerConnection>
+        <connection>scm:git:https://github.com/fjakop/annotation-validator.git</connection>
+        <developerConnection>scm:git:https://github.com/fjakop/annotation-validator.git</developerConnection>
         <url>https://github.com/fjakop/annotation-validator</url>
         <tag></tag>
     </scm>
