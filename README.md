@@ -1,5 +1,4 @@
-[![build status](https://travis-ci.org/arxes-tolina/annotation-validator.svg?branch=master)](https://github.com/arxes-tolina/annotation-validator/commits/master)
-[![quality status](https://sonarcloud.io//api/badges/gate?key=de.tolina.common.validation%3Aannotation-validator)](https://sonarcloud.io/dashboard?id=de.tolina.common.validation%3Aannotation-validator)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=fjakop_annotation-validator&metric=alert_status)](https://sonarcloud.io/dashboard?id=fjakop_annotation-validator)
 
 # Usage with Maven
 
@@ -7,9 +6,9 @@ Add the following dependency to your pom.xml
 
 ```
 <dependency>
-	<groupId>de.tolina.common.validation</groupId>
+	<groupId>de.jakop.validation</groupId>
 	<artifactId>annotation-validator</artifactId>
-	<version>1.0</version>
+	<version>2.0.2</version>
 	<scope>test</scope>
 </dependency>
 ```
@@ -35,7 +34,7 @@ class AnnotatedTestClass {
 If you would like to check the class to be annotated only with `@MyAnnotation` and only have the configured params use the following
 
 ```
-import static de.tolina.common.validation.AnnotationDefinition.*;
+import static AnnotationDefinition.*;
 
 ...
 
@@ -48,7 +47,7 @@ validate().exactly() //
 If you would like to check the class to be annotated only with `@MyAnnotation` but also want to consider default values for not configured params use the following
 
 ```
-import static de.tolina.common.validation.AnnotationDefinition.*;
+import static AnnotationDefinition.*;
 
 ...
 

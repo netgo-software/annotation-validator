@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.2] - 2021-09-02
+### Changed
+- Multiple dependencies updated
+
+## [2.0.1] - 2020-09-09
+### Changed
+- Moved to new coordinates de.jakop.validation:annotation-validator
+- Multiple dependencies updated
+
 ## [2.0] - 2018-03-13
 ### Changed
 - Dependencies updated: assertj-core, commons-lang3, jsr305, spring-core
