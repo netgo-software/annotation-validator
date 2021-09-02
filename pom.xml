@@ -18,12 +18,13 @@
     Modifications copyright (C) 2020 Frank Jakop
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.jakop.validation</groupId>
     <artifactId>annotation-validator</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Annotation Validator</name>
@@ -53,7 +54,7 @@
         <connection>scm:git:ssh://git@github.com/fjakop/annotation-validator.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/fjakop/annotation-validator.git</developerConnection>
         <url>https://github.com/fjakop/annotation-validator</url>
-        <tag>annotation-validator-2.0.2</tag>
+        <tag></tag>
     </scm>
 
     <properties>
@@ -175,7 +176,7 @@
                     <header>APACHE-2-with-modifications.txt</header>
                     <properties>
                         <owner>Frank Jakop</owner>
-                        <email />
+                        <email></email>
                     </properties>
                     <excludes>
                         <exclude>**/README.md</exclude>
